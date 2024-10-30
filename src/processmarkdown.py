@@ -26,7 +26,10 @@ def split_nodes_images(old_nodes):
             nodes.append(node)
             continue
         images = extract_markdown_images(node.text)
-        nodes.extend(split_node_image(node.text, images, 0))
+        if len(images) > 0:
+            nodes.extend(split_node_image(node.text, images, 0))
+        else:
+            nodes.append(node)
     return nodes
 
 def split_node_image(text, images, index):
@@ -36,7 +39,7 @@ def split_node_image(text, images, index):
     if split_text[0] != "":
         nodes.append(TextNode(split_text[0], TextType.NORMAL))
     nodes.append(TextNode(image[0], TextType.IMAGE, image[1]))
-    if len(images) > index + 1:
+    if index < len(images) - 1:
         nodes.extend(split_node_image(split_text[1], images, index + 1))
     elif split_text[1] != "":
         nodes.append(TextNode(split_text[1], TextType.NORMAL))
@@ -49,7 +52,10 @@ def split_nodes_links(old_nodes):
             nodes.append(node)
             continue
         links = extract_markdown_links(node.text)
-        nodes.extend(split_node_link(node.text, links, 0))
+        if len(links) > 0:
+            nodes.extend(split_node_link(node.text, links, 0))
+        else:
+            nodes.append(node)
     return nodes
 
 def split_node_link(text, links, index):
@@ -59,7 +65,7 @@ def split_node_link(text, links, index):
     if split_text[0] != "":
         nodes.append(TextNode(split_text[0], TextType.NORMAL))
     nodes.append(TextNode(link[0], TextType.LINK, link[1]))
-    if len(links) > index + 1:
+    if index < len(links) - 1:
         nodes.extend(split_node_link(split_text[1], links, index + 1))
     elif split_text[1] != "":
         nodes.append(TextNode(split_text[1], TextType.NORMAL))
@@ -71,3 +77,11 @@ def extract_markdown_images(text):
 def extract_markdown_links(text):
     return re.findall(r"\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
 
+def text_to_textnodes(text):
+    nodes = [TextNode(text, TextType.NORMAL)]
+    nodes = split_nodes_images(nodes)
+    nodes = split_nodes_links(nodes)
+    nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
+    nodes = split_nodes_delimiter(nodes, "*", TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
+    return nodes
