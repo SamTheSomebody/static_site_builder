@@ -1,6 +1,6 @@
 import unittest
 
-from processmarkdown import *
+from block_text_to_text_node import *
 from textnode import TextNode, TextType
 
 class TestProcessMarkdown(unittest.TestCase):
