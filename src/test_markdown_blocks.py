@@ -1,6 +1,6 @@
 import unittest
 
-from markdown_block import *
+from markdown_blocks import *
 
 class TestSplitBlocks(unittest.TestCase):
     def test_split_blocks(self):

@@ -1,61 +1,76 @@
-from markdown_block import *
-from htmlnode import *
-from block_text_to_text_node import text_to_textnodes
-from textnode import text_node_to_html_node
+from markdown_blocks import *
+from html_node import *
+from inline_markdown import text_to_text_nodes
+from text_node import text_node_to_html_node
 
 def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
     children = []
     for block in blocks:
-        block_type = block_to_block_type(block)
-        tag = get_tag_from_block_type(block_type)
-        lines = block.splitlines()
-        if tag == "ol":
-            for i in range(0, len(lines)):
-                lines[i] = f"<li>{line}</li>"
-        cleaned_block = __remove_markdown_block_tags__(block, block_type)
-        text_nodes = text_to_textnodes(cleaned_block)
-        child_nodes = list(map(lambda x: text_node_to_html_node(x), text_nodes))
-        node = ParentNode(tag, child_nodes)
-        if tag == "code":
-            node = ParentNode("pre", node)
+        node = __block_to_html_node__(block)
         children.append(node)
     return ParentNode("div", children)
 
-def __get_tag_from_block_type__(block, block_type):
+def __block_to_html_node__(block):  
+    block_type = block_to_block_type(block)
     match block_type:
         case BlockType.QUOTE:
-            return "blockquote"
+            return quote_to_html_node(block)
         case BlockType.UNORDERED_LIST:
-            return "ul"
+            return unordered_list_to_html_node(block)
         case BlockType.ORDERED_LIST:
-            return "ol"
+            return ordered_list_to_html_node(block) 
         case BlockType.CODE:
-            return "code"
+            return code_to_html_node(block) 
         case BlockType.HEADING:
-            return f"h{len(block.split(" ")[0])}"
-        case _:
-            return "p"
+            return heading_to_html_node(block)
+        case BlockType.PARAGRAPH:
+            return paragraph_to_html_node(block)
+    raise ValueError("Invalid Block Type!")
 
-def __remove_markdown_block_tags__(block, block_type):
-    match block_type:
-        case BlockType.QUOTE:
-            return __remove_start_of_lines(block, 2)
-        case BlockType.UNORDERED_LIST:
-            return __remove_start_of_lines(block, 2)
-        case BlockType.ORDERED_LIST:
-            return __remove_start_of_lines(block, 3)
-        case BlockType.CODE:
-            return block[3:len(block)-6]
-        case BlockType.HEADING:
-            return (" ").join(block.split(" ")[1:])
-        case _:
-            return block
+def text_to_children(text):
+    text_nodes = text_to_text_nodes(text)
+    children = list(map(lambda x: text_node_to_html_node(x), text_nodes))
+    return children
 
-def __remove_start_of_lines(block, length):
+def paragraph_to_html_node(block):
+    children = text_to_children(block)
+    return ParentNode("p", children)
+
+def heading_to_html_node(block):
+    split = block.split(" ")
+    length = len(split[0])
+    value = " ".join(split[1:])
+    children = text_to_children(value)
+    return ParentNode(f"h{length}", children)
+
+def code_to_html_node(block):
+    if not block.startswith("```") or not block.endswith("```"):
+        raise ValueError("Invalid code block")
+    text = block[4:-3]
+    children = text_to_children(text)
+    node = ParentNode("code", children)
+    return ParentNode("pre", [code])
+
+def ordered_list_to_html_node(block):
     lines = block.splitlines()
-    for i in range(0, len(lines)):
-        lines[i] = lines[i][:length)
-    return ("\n").join(lines)
+    func = lambda x: (ParentNode("li", text_to_children(x[3:])))
+    children = lst(map(func, lines))
+    return ParentNode("ol", children)
 
+def unordered_list_to_html_node(block):
+    lines = block.splitlines()
+    funct = lambda x: ParentNode("li", text_to_children(x[2:]))
+    children = lst(map(func, lines))
+    return ParentNode("ul", children)
 
+def quote_to_html_node(block):
+    lines = blcok.splitlines()
+    new_lines = []
+    for line in lines:
+        if not line.startswith(">"):
+            raise ValueError("Invalid quote block")
+        new_lines.append(line.lstrip(">").strip())
+    text = " ".join(new_lines)
+    children = text_to_children(text)
+    return ParentNode("blockquote", children)

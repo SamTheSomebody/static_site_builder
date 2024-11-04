@@ -1,7 +1,7 @@
 import unittest
 
-from block_text_to_text_node import *
-from textnode import TextNode, TextType
+from inline_markdown import *
+from text_node import TextNode, TextType
 
 class TestProcessMarkdown(unittest.TestCase):
     def test_bold_text(self):
@@ -129,7 +129,7 @@ class TestExtractLink(unittest.TestCase):
 class TestExtractAll(unittest.TestCase):
     def test_all_types(self):
         markdown = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)" 
-        result = text_to_textnodes(markdown)
+        result = text_to_text_nodes(markdown)
         expected = [
             TextNode("This is ", TextType.NORMAL),
             TextNode("text", TextType.BOLD),
