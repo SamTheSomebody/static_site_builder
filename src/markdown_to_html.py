@@ -50,22 +50,22 @@ def code_to_html_node(block):
     text = block[4:-3]
     children = text_to_children(text)
     node = ParentNode("code", children)
-    return ParentNode("pre", [code])
+    return ParentNode("pre", [node])
 
 def ordered_list_to_html_node(block):
     lines = block.splitlines()
     func = lambda x: (ParentNode("li", text_to_children(x[3:])))
-    children = lst(map(func, lines))
+    children = list(map(func, lines))
     return ParentNode("ol", children)
 
 def unordered_list_to_html_node(block):
     lines = block.splitlines()
-    funct = lambda x: ParentNode("li", text_to_children(x[2:]))
-    children = lst(map(func, lines))
+    func = lambda x: ParentNode("li", text_to_children(x[2:]))
+    children = list(map(func, lines))
     return ParentNode("ul", children)
 
 def quote_to_html_node(block):
-    lines = blcok.splitlines()
+    lines = block.splitlines()
     new_lines = []
     for line in lines:
         if not line.startswith(">"):
