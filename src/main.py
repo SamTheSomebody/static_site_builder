@@ -5,7 +5,7 @@ from html_node import *
 
 def main():
     delete_and_copy_files()
-    generate_page("content/index.md", "template.html", "public/index.html")
+    generate_pages_recursive("content", "template.html", "public")
 
 
 def delete_and_copy_files():
@@ -56,4 +56,17 @@ def generate_page(from_path, template_path, dest_path):
     with open(dest_path, "w") as x:
         x.write(final_html)
 
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    print(f"Currently at: {dir_path_content}")
+    if os.path.isfile(dir_path_content):
+        if ".md" in dir_path_content:
+            generate_page(dir_path_content, template_path, dest_dir_path.replace(".md", ".html"))
+        return
+    sub_paths = os.listdir(dir_path_content)
+    for sub_path in sub_paths:
+        path = os.path.join(dir_path_content, sub_path)
+        dest_path = os.path.join(dest_dir_path, sub_path)
+        print(f"Found: {path}")
+        generate_pages_recursive(path, template_path, dest_path)
 main()
+
